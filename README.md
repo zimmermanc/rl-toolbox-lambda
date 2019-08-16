@@ -24,4 +24,4 @@ Url    ( api2.redlock.io )
 
 
 
-Create Cloudwatch rule to execute lambda script as often as Wyndham would like this script run.
+Create Cloudwatch rule to execute lambda script as often as you would like this script run.
