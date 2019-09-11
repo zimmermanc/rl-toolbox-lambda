@@ -36,7 +36,7 @@ def config():
     customername = os.environ['customername']
     url = os.environ['url']
     s3_bucket = os.environ['TargetS3Bucket']
-    csv_file_name = '/tmp/alert_list.csv'
+    csv_file_name = '/tmp/alert_list.json'
     rl_settings = {}
     rl_settings['username'] = username
     rl_settings['password'] = password
@@ -63,51 +63,12 @@ def create_csv_file(csv_file_name,rl_settings):
   print(rl_settings)
   rl_settings, response_package = rl_lib_api.alltime_alert_list_get(rl_settings)
   alertdata = response_package['data']
-  print(alertdata)
-  masterlist=[]
-  for each in alertdata:
-    list=[]
-    list.append(each['status'])
-    list.append(each['policy']['name'])
-    list.append(each['resource']['name'])
-    list.append(each['resource']['accountId'])
-    list.append(each['resource']['region'])
-    list.append(each['resource']['account'])
-    list.append(each['policy']['severity'])
-    try:
-        each['resource']['id']
-    except KeyError:
-        list.append('None')
-    else:
-      list.append(each['resource']['id'])
-    try:
-        each['id']
-    except KeyError:
-        list.append('None')
-    else:
-        list.append(each['id'])
-    try:
-        each['alertTime']
-    except KeyError:
-        list.append('None')
-    else:
-        try:
-            formattedtime = datetime.datetime.fromtimestamp(each['alertTime']/1000).strftime('%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            list.append('None')
-        else:
-            list.append(formattedtime)
-    masterlist.append(list)
-
-
-  with open(csv_file_name, "w") as f:
-  	writer = csv.writer(f)
-  	writer.writerow(["Status", "Policy Name", "Resource Name", "Account ID", "Region", "Account Name", "Severity", "Resource ID", "Alert ID", "Alert Time"])
-  	writer.writerows(masterlist)
-
+  with open(csv_file_name, 'w') as f:
+    json.dump(alertdata, f)
+    
 def main(event, context):
   get_config = config()
   result = create_csv_file(csv_file_name,rl_settings)
-  upload = upload_csv_file(csv_file_name, 'alertlist-%s.csv' % time.strftime("%d-%m-%Y"))
+  upload = upload_csv_file(csv_file_name, 'alertlist-%s.json' % time.strftime("%d-%m-%Y"))
 
 
