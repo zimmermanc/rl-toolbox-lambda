@@ -229,7 +229,7 @@ def monthly_api_alert_list_get(rl_settings,requestseverity):
     url = "https://" + rl_settings['apiBase'] + "/alert?alert.status=open%s&timeAmount=1&timeType=relative&timeUnit=month&detailed=true" % requestseverity
     return rl_call_api(action, url, rl_settings)
 
-def alltime_alert_list_get(rl_settings):
+def alltime_alert_list_get(rl_settings,group):
     action = "GET"
-    url = "https://" + rl_settings['apiBase'] + "/alert?alert.status=open&timeType=to_now&timeUnit=epoch&detailed=true"
+    url = "https://" + rl_settings['apiBase'] + "/alert?account.group=%s&alert.status=open&timeType=to_now&timeUnit=epoch&detailed=true" % group
     return rl_call_api(action, url, rl_settings)

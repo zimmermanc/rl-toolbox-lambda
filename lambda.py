@@ -31,12 +31,14 @@ def config():
     global s3_bucket
     global csv_file_name
     global rl_settings
+    global groups
     username = os.environ['username']
     password = os.environ['password']
     customername = os.environ['customername']
     url = os.environ['url']
     s3_bucket = os.environ['TargetS3Bucket']
     csv_file_name = '/tmp/alert_list.json'
+    groups = [ "AWS Sandbox", "AWS Test Accounts", "AWS Infrastructure Development", "AWS Production Accounts"]
     rl_settings = {}
     rl_settings['username'] = username
     rl_settings['password'] = password
@@ -57,18 +59,17 @@ def upload_csv_file(filename, key):
     bucket.upload_file(filename, key)
 
 
-def create_csv_file(csv_file_name,rl_settings):
+def create_csv_file(csv_file_name,rl_settings,each):
   print(rl_settings['apiBase'])
   rl_settings = rl_lib_api.rl_jwt_get(rl_settings)
   print(rl_settings)
-  rl_settings, response_package = rl_lib_api.alltime_alert_list_get(rl_settings)
+  rl_settings, response_package = rl_lib_api.alltime_alert_list_get(rl_settings,each)
   alertdata = response_package['data']
   with open(csv_file_name, 'w') as f:
     json.dump(alertdata, f)
     
 def main(event, context):
   get_config = config()
-  result = create_csv_file(csv_file_name,rl_settings)
-  upload = upload_csv_file(csv_file_name, 'alertlist-%s.json' % time.strftime("%d-%m-%Y"))
-
-
+  for each in groups:
+    result = create_csv_file(csv_file_name,rl_settings,each)
+    upload = upload_csv_file(csv_file_name, 'alertlist-%s-%s.json' % (time.strftime("%d-%m-%Y"), each))
